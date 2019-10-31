@@ -38,13 +38,48 @@ class StudentController {
         height,
     });
   }
+
+  async update(req, res) {
+    const schema = Yup.object().shape({
+      name: Yup.string(),
+      email: Yup.string().email(),
+      age: Yup.number(),
+      weight: Yup.number(),
+      height: Yup.number(),
+    });
+
+    if(!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation Fails' });
+    }
+
+    const { email } = req.body;
+
+    // pegando chave primaria do Estudante
+    // exemplo de representação de rota:
+    // routes.update('/students/:id', StudentController.update);
+    const student = await Student.findByPk(req.params.id);
+
+    if(email && email !== student.email) {
+      const studentExists = await Student.findOne({
+         where: { email }
+      });
+
+       if(studentExists) {
+         return res.status(400).json({ error: 'Students already exists.' });
+       }
+    }
+
+    const { id, name, age, weight, height } = await student.update(req.body);
+
+    return res.json({
+      id,
+      name,
+      email,
+      age,
+      weight,
+      height
+    });
+  }
 }
 
 export default new StudentController();
-
-        // name: Sequelize.STRING,
-        // email: Sequelize.STRING,
-        // age: Sequelize.DATEONLY,
-        // weight: Sequelize.FLOAT,
-        // height: Sequelize.FLOAT,
-

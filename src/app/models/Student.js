@@ -1,7 +1,5 @@
 import Sequelize, { Model } from 'sequelize';
 
-import '../../database/index';
-
 class Student extends Model{
     static init(sequelize){ 
       super.init(
@@ -17,8 +15,8 @@ class Student extends Model{
         }
       );
 
-      return this;
-    }
+    return this;
+  }
 }
 
 export default Student; 
