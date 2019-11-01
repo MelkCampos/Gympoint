@@ -3,7 +3,7 @@ import Plan from '../models/Plan';
 
 class PlanController {
 
-    // listantem de planos
+    // Listantem de Planos
     async index(req, res) {
 
       const plans = await Plan.findAll({
@@ -14,6 +14,7 @@ class PlanController {
       return res.json(plans);
     }
 
+    // Criação de Planos
     async store(req, res) {
       const schema = Yup.object().shape({
         title: Yup.string().required(),
@@ -42,6 +43,55 @@ class PlanController {
         duration,
         price, 
       });
+    }
+    
+
+    // Update de planos
+    async update(req, res){
+      // id do planos a ser atualizado
+      const plan = await Plan.findByPk(req.params.id);
+
+      if(!plan) {
+        return res.status(400).json({ error: 'Plan does not exist.' });
+      }
+
+      // dados a serem alterados
+      const schema = Yup.object().shape({ 
+        title: Yup.string(),
+        duration: Yup
+        .number()
+        .positive(),
+        price: Yup.number().positive(),
+       });
+
+       if(!(await schema.isValid(req.body))) {
+
+         return res.status(400).json({ error: 'Validation Fails.' });
+       }
+
+       const { id, title, duration, price } = await plan.update(req.body);
+
+       return res.json({
+        id,
+        title,
+        duration,
+        price
+       });
+    }
+
+    // Excluir Plano
+    async delete(req, res) {
+       // id do planos a ser apagado
+      const plan = await Plan.findByPk(req.params.id);
+
+      if(!plan) {
+        return res.status(400).json({ error: 'Plan does not exist.' });
+      }
+
+      // excluindo
+      await plan.destroy();
+
+      return res.json(`Plan deleted.`);
     }
 }
 

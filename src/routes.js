@@ -40,10 +40,10 @@ routes.get('/plans', PlansController.index);
 routes.post('/plans', PlansController.store);
 
 // atualização/modificações de planos
-// routes.put('/plans/:id', PlansController.update);
+ routes.put('/plans/:id', PlansController.update);
 
 // excluir plano :( 
-// routes.delete('/plans/:id', PlansController.delete);
+routes.delete('/plans/:id', PlansController.delete);
 
 
 
