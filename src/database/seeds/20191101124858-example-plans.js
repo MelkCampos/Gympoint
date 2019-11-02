@@ -3,9 +3,8 @@
 module.exports = {
   up: QueryInterface => {
       return QueryInterface.bulkInsert(
-        'plans',
-
-        [
+        "plans",
+        [ 
           {
             title: 'Start',
             duration: 1,
@@ -28,9 +27,7 @@ module.exports = {
             updated_at: new Date(),
           },
         ],
-
-        {  }
-
+          {}
       );
   },
 
