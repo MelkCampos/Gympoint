@@ -5,8 +5,7 @@ import Student from '../models/Student';
 import User from '../models/User';
 import Plan from '../models/Plan';
 
-// 
-// 
+import Mail from '../../lib/Mail';
 
 class RegistrationController {
 
@@ -25,6 +24,11 @@ class RegistrationController {
           as: 'student',
           attributes: ['id', 'name', 'email'],
         },
+        {
+          model: Plan,
+          as: 'plan',
+          attributes: ['id', 'title', 'duration', 'price'],
+        },
       ],
      });
 
@@ -33,7 +37,7 @@ class RegistrationController {
 
   // Criação de Novos Estudantes
   async store(req, res) {
-    const schme = Yup.object().shape({ 
+    const schema = Yup.object().shape({ 
       
       student_id: Yup.number()
       .integer()
@@ -46,7 +50,7 @@ class RegistrationController {
       start_date: Yup.date().required(),
      });
 
-     if(!(await schme.isValid(req.body))) {
+     if(!(await schema.isValid(req.body))) {
        return res.status(400).json({ error: 'Validation Fails.' });
      }
 
