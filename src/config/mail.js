@@ -10,6 +10,6 @@ export default {
   },
 
   default: {
-    from: 'Equipe GymPoint <gympointproject@gmail.com>'
+    from: 'Equipe GymPoint <gympointproject@gmail.com>',
   },
 };

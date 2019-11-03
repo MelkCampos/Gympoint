@@ -2,6 +2,18 @@ import * as Yup from 'yup';
 import Student from '../models/Student';
 
 class StudentController {
+
+  // listagem de estudantes (não registrados)
+  async index(req, res){
+    const students = await Student.findAll({
+          // atributos a serem mostrados na listagem
+          attributes: ['id','name', 'email'],
+    });
+
+    return res.json(students);
+  }
+
+
   async store(req, res) {
       const schema = Yup.object().shape({
         name: Yup.string().required(),

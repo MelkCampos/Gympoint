@@ -12,10 +12,6 @@ import mailConfig from '../config/mail';
 
 
 
-// =-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-// | LEMBRAR: TEM QUE IMPORTAR ESSE ARQUIVO NO "REGISTRATION". |
-// =-=-=-=-=--=-=-==-=-=-=-=-=-=-=-=--==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
 
 class Mail {
   constructor() {
@@ -43,6 +39,8 @@ class Mail {
           defaultLayout: 'default',
           extname: '.hbs',
         }),
+        viewPath,
+        extname: '.hbs'
       }),
     );
   }

@@ -1,12 +1,15 @@
 import { Router } from 'express';
 
 import authMiddleware from './app/middleware/auth';
-import studentMiddleware from './app/middleware/checkStudentExists';
+import checkStudentExists from './app/middleware/checkStudentExists';
+
 import UserController from './app/controllers/UserController';
 import SessionController from './app/controllers/SessionController';
 import StudentController from './app/controllers/StudentController';
 import PlansController from './app/controllers/PlansController';
 import RegistrationController from './app/controllers/RegistrationController';
+import CheckinController from './app/controllers/CheckinController';
+
 
 const routes = new Router();
 
@@ -16,20 +19,27 @@ routes.post('/users', UserController.store);
 routes.post('/sessions', SessionController.store);
 
 
+// ROTAS DE CHECKIS 
+// comparecimento na academia
+
+
+routes.get('/students/:id/checkins', CheckinController.show);
+routes.post('/students/:id/checkins', CheckinController.store);
+
+
 // altenticação de T
 routes.use(authMiddleware);
 
 
 
-
-// atualização de dados de usuário
-routes.put('/users', UserController.update);
+// listagem de estduantes não registrados a usu da academia
+routes.get('/students', StudentController.index);
 
 // criação de usuário
-routes.post('/students/', StudentController.store);
+routes.post('/students', StudentController.store);
 
 // atualização de usuário
- routes.put('/students/:id', studentMiddleware, StudentController.update);
+ routes.put('/students/:id', checkStudentExists, StudentController.update);
 
 
  // ROTAS DE PLANOS
@@ -57,7 +67,7 @@ routes.delete('/plans/:id', PlansController.delete);
  routes.post('/registrations', RegistrationController.store);
  
  // atualização/modificações de matriculas/estudantes
-  //routes.put('/registrations/:id', RegistrationController.update);
+routes.put('/registrations/:id', RegistrationController.update);
  
  // excluir matriculas/estudantes :( 
  //routes.delete('/registrations/:id', RegistrationController.delete);

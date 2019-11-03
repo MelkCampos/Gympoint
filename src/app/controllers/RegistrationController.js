@@ -2,10 +2,10 @@ import * as Yup from 'yup';
 import { isBefore, addMonths, parseISO, format } from 'date-fns';
 import Registration from '../models/Registration';
 import Student from '../models/Student';
-import User from '../models/User';
 import Plan from '../models/Plan';
 
-import Mail from '../../lib/Mail';
+import NewRegistrationMail from '../jobs/NewRegistrationMail';
+import Queue from '../../lib/Queue';
 
 class RegistrationController {
 
@@ -33,13 +33,14 @@ class RegistrationController {
      });
 
      return res.json(registrations);
-  }
+  } // index
 
   // Criação de Novos Estudantes
   async store(req, res) {
     const schema = Yup.object().shape({ 
-      
-      student_id: Yup.number()
+
+      student_id: Yup
+      .number()
       .integer()
       .required(),
 
@@ -54,15 +55,16 @@ class RegistrationController {
        return res.status(400).json({ error: 'Validation Fails.' });
      }
 
+
      const { student_id, plan_id, start_date } = req.body;
 
-     const student = await Student.findByPk(req.params.id);
+     const student = await Student.findOne({ where: { id: student_id } });
 
      if(!student) {
        return res.status(400).json({ error: 'Student does not exist.' });
      }
 
-     const plan = await Plan.findByPk(req.params.id);
+     const plan = await Plan.findOne({ where: { id: plan_id } });
      
      if(!plan) {
       return res.status(400).json({ error: 'Plan does not exist.' });
@@ -72,7 +74,7 @@ class RegistrationController {
      const parsedStartDate = parseISO(start_date); 
 
      // verificação se horário passado por usuário já não passou
-     if(isBefore(parsedStartDate), new Date()) {
+     if(isBefore(parsedStartDate, new Date())) {
       return res.status(400).json({ error: 'Past dates are not permited.' });
      }
 
@@ -81,10 +83,10 @@ class RegistrationController {
      // calculo com relação as datas
      const price = plan.duration * plan.price;
      
-     const formattedStartDate = format(parsedStartDate, 'yyy-MM-dd');
-     const formattedEndDate = format(end_date, 'yyy-MM-dd');
+     const formattedStartDate = format(parsedStartDate, 'yyyy-MM-dd');
+     const formattedEndDate = format(end_date, 'yyyy-MM-dd');
 
-     const registrations = await Registration.create({
+     const registration = await Registration.create({
        student_id,
        plan_id,
        start_date: formattedStartDate,
@@ -92,18 +94,81 @@ class RegistrationController {
        price,
      });
 
-     return res.json(
-        { 
-        student_id,
-        plan_id,
-        start_date: formattedStartDate,
-        end_date: formattedEndDate,
-        price,
+
+     // Envio de email  para o estudante após ele ter feito o cadastro
+     await Queue.add(NewRegistrationMail.key, {
+       student, 
+       plan, 
+       registration, 
+     }); 
+
+
+     return res.json({  
+        student_id, 
+        plan_id, 
+        start_date: formattedStartDate, 
+        end_date: formattedEndDate, 
+        price, 
       });
+  } // store
+
+  // atualização de registro
+  async update(req, res) {
+    const schema = Yup.object().shape({
+
+      student_id: Yup.number().integer(),
+      plan_id: Yup.number().integer(),
+      start_date: Yup.date(),
+    });
+
+    if(!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation Falils' });
+    }
+
+    const registration = await Registration.findByPk(req.params.id);
+
+    const { student_id, plan_id, start_date } = req.body;
+
+    const newStudentId = student_id || registration.student_id;
+
+    const plan = plan_id 
+    ? await Plan.findOne({ where: { id: plan_id } })
+    : await Plan.findOne({ where: { id: registration.plan_id} });
+    
+    // atualição de data de início -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    if(start_date) {
+      const parsedStartDate = parseISO(start_date);
+
+      if(isBefore(parsedStartDate, new Date())) {
+        return res.status(400).json({ error: 'Old dates are not permited' });
+
+    }
+
+
+    const end_date = addMonths(parsedStartDate, plan.duration)
+
+    const price = plan.duration * plan.price
+
+    const formattedStartDate = format(parsedStartDate, 'yyyy-MM-dd');
+    const formattedEndDate = format(end_date, 'yyyy-MM-dd');
+    // =-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+     // mostrador de atualizações
+    await registration.update({
+      student_id: newStudentId,
+      plan_id: plan.id,
+      start_date: formattedStartDate,
+      end_date: formattedEndDate,
+      price,
+    });
   }
 
+    return res.json(registration);
+  } // update
 
-  
-}
+
+  // modo de DELETAR
+
+} 
 
 export default new RegistrationController();
