@@ -9,6 +9,7 @@ import Checkin from '../models/Checkin';
 class CheckinController {
 
   async show(req, res) {
+    
     const student = await Student.findByPk(req.params.id);
 
     if(!student) 
@@ -24,7 +25,7 @@ class CheckinController {
 
     return res.json(checkins);
 
-  } // show
+  } // show 
 
     // Realizar Checkin
 

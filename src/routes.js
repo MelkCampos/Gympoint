@@ -9,7 +9,7 @@ import StudentController from './app/controllers/StudentController';
 import PlansController from './app/controllers/PlansController';
 import RegistrationController from './app/controllers/RegistrationController';
 import CheckinController from './app/controllers/CheckinController';
-
+import HelpOrdersController from './app/controllers/HelpOrdersController';
 
 const routes = new Router();
 
@@ -22,12 +22,21 @@ routes.post('/sessions', SessionController.store);
 // ROTAS DE CHECKIS 
 // comparecimento na academia
 
-
+// listar todos os checkins
 routes.get('/students/:id/checkins', CheckinController.show);
+
+// criar checkins
 routes.post('/students/:id/checkins', CheckinController.store);
 
+// Listar todos pedidos de auxílio de um usuário com base em seu ID
+routes.get('/students/:id/help-orders', HelpOrdersController.show);
 
-// altenticação de T
+//  Rota para o aluno cadastrar pedidos de auxílio apenas informando seu ID
+routes.post('/students/:id/help-orders', HelpOrdersController.store);
+
+
+
+// altenticação de Token
 routes.use(authMiddleware);
 
 
